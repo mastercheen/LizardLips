@@ -345,16 +345,19 @@ const SHOTS_UNTIL_DROP = 6; // Ceiling drops after this many shots without a mat
 
 let shotsSinceMatch = 0;
 let ceilingOffset = 0; // How many rows the ceiling has dropped
+let recentShooterColors = []; // Track last few colors to prevent bad streaks
+const MAX_SHOTS_WITHOUT_COLOR = 5; // Guarantee each active color appears within N shots
 
 // ---- Save/Load System ----
 function saveGame() {
   const saveData = {
-    version: 2, // Bumped for special bubble support
+    version: 3, // Bumped for mercy rule support
     score,
     level,
     combo,
     shotsSinceMatch,
     ceilingOffset,
+    recentShooterColors,
     grid: grid.map(row => row ? row.map(cell => cell ? { c: cell.colorIndex, s: cell.special || null } : null) : null),
     shootBubble: shootBubble ? { c: shootBubble.colorIndex, s: shootBubble.special || null } : null,
     nextBubble: nextBubble ? { c: nextBubble.colorIndex, s: nextBubble.special || null } : null,
@@ -374,6 +377,7 @@ function loadGame() {
     combo = data.combo || 0;
     shotsSinceMatch = data.shotsSinceMatch || 0;
     ceilingOffset = data.ceilingOffset || 0;
+    recentShooterColors = data.recentShooterColors || [];
 
     // Rebuild grid (supports both v1 and v2 save formats)
     grid = [];
@@ -612,7 +616,10 @@ function getActiveColors() {
   for (let r = 0; r < ROWS; r++) {
     if (!grid[r]) continue;
     for (let c = 0; c < COLS; c++) {
-      if (grid[r][c]) colors.add(grid[r][c].colorIndex);
+      // Skip rainbow bubbles - they match any color so their colorIndex is irrelevant
+      if (grid[r][c] && grid[r][c].special !== 'rainbow') {
+        colors.add(grid[r][c].colorIndex);
+      }
     }
   }
   return [...colors];
@@ -620,7 +627,24 @@ function getActiveColors() {
 
 function randomBubbleColor() {
   const active = getActiveColors();
-  return active.length === 0 ? Math.floor(Math.random() * 4) : active[Math.floor(Math.random() * active.length)];
+  if (active.length === 0) return Math.floor(Math.random() * 4);
+  if (active.length === 1) return active[0]; // Only one color left, always give it
+
+  // Check if any active color hasn't appeared in recent shots (mercy rule)
+  const missingColors = active.filter(c => !recentShooterColors.includes(c));
+  if (missingColors.length > 0 && recentShooterColors.length >= MAX_SHOTS_WITHOUT_COLOR) {
+    // Force a missing color to appear
+    const color = missingColors[Math.floor(Math.random() * missingColors.length)];
+    recentShooterColors.push(color);
+    if (recentShooterColors.length > MAX_SHOTS_WITHOUT_COLOR) recentShooterColors.shift();
+    return color;
+  }
+
+  // Normal random selection from active colors
+  const color = active[Math.floor(Math.random() * active.length)];
+  recentShooterColors.push(color);
+  if (recentShooterColors.length > MAX_SHOTS_WITHOUT_COLOR) recentShooterColors.shift();
+  return color;
 }
 
 function createShootBubble() {
@@ -1102,6 +1126,7 @@ document.getElementById('next-level-btn').addEventListener('click', () => {
   level++;
   shotsSinceMatch = 0;
   ceilingOffset = 0;
+  recentShooterColors = [];
   initGrid(Math.min(4 + level, 9));
   shootBubble = createShootBubble();
   nextBubble = createShootBubble();
@@ -1119,6 +1144,7 @@ function restartGame() {
   movingBubble = null;
   shotsSinceMatch = 0;
   ceilingOffset = 0;
+  recentShooterColors = [];
   resize();
   initGrid(5);
   shootBubble = createShootBubble();
