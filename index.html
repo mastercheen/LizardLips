@@ -211,6 +211,69 @@
     0%   { opacity: 1; transform: translateY(0) scale(1.2); }
     100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
   }
+
+  /* Update toast */
+  .update-toast {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.95));
+    border: 1px solid rgba(134, 239, 172, 0.4);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: bottom 0.3s ease-out;
+    max-width: calc(100% - 32px);
+  }
+
+  .update-toast.show {
+    bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .update-toast-text {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .update-toast-btn {
+    font-family: 'Chakra Petch', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #fff;
+    color: #16a34a;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .update-toast-btn:active {
+    background: #dcfce7;
+    transform: scale(0.97);
+  }
+
+  .update-toast-dismiss {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #fff;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .update-toast-dismiss:active {
+    background: rgba(255,255,255,0.1);
+  }
 </style>
 </head>
 <body>
@@ -252,6 +315,13 @@
     </div>
   </div>
   <div class="controls-hint">DRAG TO AIM · RELEASE TO SHOOT</div>
+</div>
+
+<!-- Update notification toast -->
+<div class="update-toast" id="update-toast">
+  <span class="update-toast-text">New version available!</span>
+  <button class="update-toast-btn" id="update-btn">UPDATE</button>
+  <button class="update-toast-btn update-toast-dismiss" id="dismiss-update-btn">LATER</button>
 </div>
 
 <script>
@@ -1285,10 +1355,48 @@ if (hasSaveGame()) {
 
 gameLoop();
 
-// Register service worker for PWA
+// Register service worker for PWA with update detection
+let newWorker;
+const updateToast = document.getElementById('update-toast');
+const updateBtn = document.getElementById('update-btn');
+const dismissBtn = document.getElementById('dismiss-update-btn');
+
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    // Check for updates on page load
+    reg.update();
+
+    // Listen for new service worker installing
+    reg.addEventListener('updatefound', () => {
+      newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        // New SW is ready and waiting to activate
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // Show update toast
+          updateToast.classList.add('show');
+        }
+      });
+    });
+  }).catch(err => console.log('SW registration failed:', err));
+
+  // Handle controller change (when new SW takes over)
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
 }
+
+// Update button - tell waiting SW to take over
+updateBtn.addEventListener('click', () => {
+  updateToast.classList.remove('show');
+  if (newWorker) {
+    newWorker.postMessage({ type: 'SKIP_WAITING' });
+  }
+});
+
+// Dismiss button - hide toast (will show again next visit)
+dismissBtn.addEventListener('click', () => {
+  updateToast.classList.remove('show');
+});
 
 </script>
 </body>

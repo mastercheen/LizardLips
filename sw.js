@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lizardlips-v2';
+const CACHE_NAME = 'lizardlips-v3';
 const ASSETS = [
   '/LizardLips/',
   '/LizardLips/index.html',
@@ -15,7 +15,14 @@ self.addEventListener('install', (event) => {
       return cache.addAll(ASSETS);
     })
   );
-  self.skipWaiting();
+  // Don't auto-skipWaiting - wait for user to confirm update
+});
+
+// Listen for skip waiting message from page
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Activate - clean old caches
