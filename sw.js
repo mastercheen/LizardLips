@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lizardlips-v1';
+const CACHE_NAME = 'lizardlips-v2';
 const ASSETS = [
   '/LizardLips/',
   '/LizardLips/index.html',
