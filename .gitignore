@@ -18,3 +18,5 @@ desktop.ini
 # Project-specific
 /docs/
 CLAUDE.md
+create-icons.ps1
+generate-icons.html

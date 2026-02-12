@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="LizardLips">
 <meta name="theme-color" content="#0a0a1a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>LizardLips</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -214,7 +216,7 @@
 <body>
 
 <div id="game-wrapper">
-  <h1>BUBBLE BLAST</h1>
+  <h1>LIZARD LIPS</h1>
   <div id="hud">
     <div>SCORE: <span id="score">0</span></div>
     <div>LEVEL: <span id="level">1</span></div>
@@ -241,7 +243,7 @@
 
     <!-- Start Screen -->
     <div class="overlay show" id="start-overlay">
-      <h2>BUBBLE BLAST</h2>
+      <h2>LIZARD LIPS</h2>
       <div class="subtitle" style="font-size:14px; color: rgba(196,181,253,0.6); text-align:center; line-height:1.6;">
         Drag to aim<br>Release to shoot<br>Match 3+ to pop
       </div>
@@ -1256,6 +1258,11 @@ if (hasSaveGame()) {
 }
 
 gameLoop();
+
+// Register service worker for PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+}
 
 </script>
 </body>
