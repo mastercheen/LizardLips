@@ -7,13 +7,15 @@ Mobile-first bubble shooter game (codename: LizardLips). Starting from a Puzzle 
 - **Frontend:** Vanilla HTML/CSS/JavaScript (single-file game)
 - **Rendering:** HTML5 Canvas
 - **Target:** Mobile browsers (touch-first, mouse fallback)
-- **Hosting:** Docker container on home media server
+- **Hosting:** GitHub Pages (https://mastercheen.github.io/LizardLips/)
 
 ## File Structure
 ```
 LizardLips/
 ├── CLAUDE.md
-├── Docs/
+├── README.md
+├── .gitignore
+├── docs/
 │   └── index.html        # Main game file (playable)
 └── .claude/
     └── settings.local.json
@@ -34,6 +36,7 @@ LizardLips/
 - **2025-02-11** — localStorage for saves (simple, no backend needed)
 - **2025-02-11** — 14 columns chosen for better precision vs original 10
 - **2026-02-11** — Special bubbles use extensible `SPECIAL_TYPES` config object for easy addition of future types
+- **2026-02-11** — GitHub Pages hosting (from /docs folder) chosen over Docker for simpler deployment and free hosting
 
 ## Track 1: Polish Current Game
 Priority features to add:
@@ -53,9 +56,8 @@ Design direction:
 - Daily challenges
 
 ## Known Issues / TODOs
-- No git repository initialized yet
 - Game branding still says "Bubble Blast" — needs LizardLips identity
 
 ## Next Session
+- Convert to PWA (manifest, service worker, icons)
 - Star rating per level or pre-designed levels
-- Initialize git repo when ready

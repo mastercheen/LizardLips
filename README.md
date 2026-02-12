@@ -4,7 +4,7 @@ A mobile-first bubble shooter game inspired by Puzzle Bobble, built with vanilla
 
 ## Play
 
-[Play LizardLips](https://brandonasmith.github.io/LizardLips/) *(GitHub Pages link - update username if different)*
+[Play LizardLips](https://mastercheen.github.io/LizardLips/)
 
 ## Features
 
