@@ -14,3 +14,7 @@ desktop.ini
 
 # Logs
 *.log
+
+# Project-specific
+/docs/
+CLAUDE.md
